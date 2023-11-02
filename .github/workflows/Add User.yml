@@ -1,0 +1,68 @@
+name: Add User
+
+on:
+  # push:
+    # branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "url_加密后验证文件路径"
+        required: true
+        default: "./verify_file.json"
+      user_id:
+        description: "用户ID(英文ID一般为QQ号或telegram ID)"
+        required: true
+        default: ""
+      user_name:
+        description: "用户昵称"
+        required: true
+        default: ""
+      device_id:
+        description: "device_id-设备ID"
+        required: true
+        default: ""
+      regtime:
+        description: "regtime-注册时间13位时间戳, 为空时默认为当前服务器时间"
+        required: false
+        default: ""
+  # pull_request:
+    # branches: [ "main" ]
+permissions:
+  contents: write
+# 一个workflow由执行的一项或多项job
+jobs:
+  # 一个job任务，任务名为build
+  build:
+    # runs-on 指定job任务运行所需要的虚拟机环境(必填字段)
+    runs-on: ubuntu-latest
+    # steps是每个Job的运行步骤，可以包含一个或多个步骤
+    steps:
+      # action命令，切换分支获取源码
+      - name: Checkout获取源码
+      # 使用action库  actions/checkout获取源码
+        uses: actions/checkout@v3
+
+      - name: use Node.js 10
+         # 使用action库  actions/setup-node安装node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16  
+
+      - name: 设置git SSH 私钥
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ACTION_RSA_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+      - name: 克隆仓库
+        run: |
+          git clone ${{ secrets.GIT_URL }} verify.tmp
+          cd verify.tmp
+          git config --global user.email "actions@github.com"
+          git config --global user.name "Github Actions"
+          node ../out/out.js adduser ${{ github.event.inputs.url }} ${{ secrets.ENCODE_KEY }} ${{ github.event.inputs.user_id }} ${{ github.event.inputs.user_name }} ${{ github.event.inputs.device_id }} ${{ github.event.inputs.regtime }}
+          git add .
+          git commit -m "Add Device: ${{ github.event.inputs.device_id }}"
+          git push
