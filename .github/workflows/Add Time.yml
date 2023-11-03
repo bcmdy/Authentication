@@ -2,13 +2,17 @@ name: Add Time
 
 on:
   # push:
-    # branches: [ "main" ]
+  # branches: [ "main" ]
   workflow_dispatch:
     inputs:
-      url:
-        description: "url-加密后验证文件路径"
+      filename:
+        description: "加密后验证文件名(推荐默认为包名)"
         required: true
-        default: "./verify_file.json"
+        default: "com.jianxiliemotuan.guanbao"
+        type: choice
+        options:
+          - "com.jianxiliemotuan.guanbao"
+          - "com.bcmdy.test"
       device_id:
         description: "device_id-设备ID(*为所有用户)"
         required: true
@@ -18,7 +22,7 @@ on:
         required: true
         default: "7"
   # pull_request:
-    # branches: [ "main" ]
+  # branches: [ "main" ]
 permissions:
   contents: write
 # 一个workflow由执行的一项或多项job
@@ -31,14 +35,15 @@ jobs:
     steps:
       # action命令，切换分支获取源码
       - name: Checkout获取源码
-      # 使用action库  actions/checkout获取源码
+        # 使用action库  actions/checkout获取源码
         uses: actions/checkout@v3
 
-      - name: use Node.js 10
-         # 使用action库  actions/setup-node安装node
+      - name:
+          use Node.js 10
+          # 使用action库  actions/setup-node安装node
         uses: actions/setup-node@v3
         with:
-          node-version: 16  
+          node-version: 16
 
       - name: 设置git SSH 私钥
         env:
@@ -54,7 +59,7 @@ jobs:
           cd verify.tmp
           git config --global user.email "actions@github.com"
           git config --global user.name "Github Actions"
-          node ../out/out.js addtime ${{ github.event.inputs.url }} ${{ secrets.ENCODE_KEY }} ${{ github.event.inputs.device_id }} ${{ github.event.inputs.days }}
+          node ../out/out.js addtime ./${{ github.event.inputs.filename }}.json ${{ secrets.ENCODE_KEY }} ${{ github.event.inputs.device_id }} ${{ github.event.inputs.days }}
           git add .
           git commit -m "Add Times ${{ github.event.inputs.device_id }} add ${{ github.event.inputs.days }} days"
           git push
