@@ -82,8 +82,8 @@ function adduser(url, key, user_id, user_name, device_id, regtime) {
     regtime,
     expiretime: Date.now(),
   };
-
-  if (userdata.some(element => element.device_id === newuser.device_id)) {
+  console.log(newuser);
+  if (userdata.some(element => element.device_id == newuser.device_id)) {
     console.error("设备已存在请勿重复添加！");
   } else {
     userdata.push(newuser);
@@ -147,10 +147,10 @@ function main(argv) {
     const gn = argv[2];
     const url = argv[3];
     const key = argv[4];
-    const device_id = argv[5];
-    const days = parseInt(argv[6]);
     const user_id = argv[5];
     const user_name = argv[6];
+    const device_id = argv[7];
+    const days = parseInt(argv[6]);
     const regtime = parseInt(argv[8]) || Date.now();
 
     switch (gn) {
