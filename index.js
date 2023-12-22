@@ -46,8 +46,10 @@ function enc(url, key) {
  */
 function addtime(url, key, device_id, days) {
   let userdata = dec(url, key);
+  let sfcz = false;
   userdata.forEach(element => {
-    if (device_id === "*" || element.device_id === device_id) {
+    sfcz = true;
+    if (device_id == "*" || element.device_id == device_id) {
       if (element.expiretime <= Date.now()) {
         element.expiretime = Date.now() + parseInt(days) * 24 * 60 * 60 * 1000;
         console.log("超时添加");
@@ -57,6 +59,9 @@ function addtime(url, key, device_id, days) {
       }
     }
   });
+  if (!sfcz) {
+    console.error("设备不存在，请检查！");
+  }
   let userdata_dec = JSON.stringify(userdata);
   fs.writeFileSync(url, userdata_dec);
   let userdata_enc = enc(url, key);
@@ -149,7 +154,7 @@ function main(argv) {
     const key = argv[4];
     const user_id = argv[5];
     const user_name = argv[6];
-    const device_id = argv[7];
+    const device_id = argv[5];
     const days = parseInt(argv[6]);
     const regtime = parseInt(argv[8]) || Date.now();
 
